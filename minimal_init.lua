@@ -42,18 +42,16 @@ local function install(dependency)
   local dir = deps_dir .. "/" .. dependency.name
   if vim.fn.isdirectory(dir) == 0 then
     io.stdout:write(("Cloning %s\n"):format(dependency.url))
-    git({ "clone", "--filter=blob:none", "--quiet", dependency.url, dir })
+    git { "clone", "--filter=blob:none", "--quiet", dependency.url, dir }
   end
-  if git({ "-C", dir, "rev-parse", "HEAD" }) ~= dependency.commit then
-    git({ "-C", dir, "fetch", "--quiet", "origin" })
-    git({ "-C", dir, "checkout", "--quiet", dependency.commit })
+  if git { "-C", dir, "rev-parse", "HEAD" } ~= dependency.commit then
+    git { "-C", dir, "fetch", "--quiet", "origin" }
+    git { "-C", dir, "checkout", "--quiet", dependency.commit }
   end
   vim.opt.runtimepath:prepend(dir)
 end
 
-if vim.fn.isdirectory(plugin_dir) == 0 then
-  error(("plugin not found in %s (set PLUGIN_DIR)"):format(plugin_dir))
-end
+if vim.fn.isdirectory(plugin_dir) == 0 then error(("plugin not found in %s (set PLUGIN_DIR)"):format(plugin_dir)) end
 
 for _, dependency in ipairs(dependencies) do
   install(dependency)
@@ -66,9 +64,9 @@ vim.o.shiftwidth = 4
 vim.o.tabstop = 4
 vim.o.swapfile = false
 
-require("nvim-treesitter").setup({ install_dir = deps_dir .. "/site" })
+require("nvim-treesitter").setup { install_dir = deps_dir .. "/site" }
 if not vim.list_contains(require("nvim-treesitter").get_installed(), "kotlin") then
-  io.stdout:write("Installing the Kotlin Tree-sitter parser\n")
+  io.stdout:write "Installing the Kotlin Tree-sitter parser\n"
   require("nvim-treesitter").install({ "kotlin" }):wait(300000)
 end
 
@@ -77,7 +75,7 @@ vim.lsp.config("kotlin_lsp", {
   filetypes = { "kotlin" },
   root_markers = { "settings.gradle.kts", "settings.gradle", "build.gradle.kts", "build.gradle", "pom.xml" },
 })
-vim.lsp.enable("kotlin_lsp")
+vim.lsp.enable "kotlin_lsp"
 
-require("refactoring").setup({})
+require("refactoring").setup {}
 require("refactoring-kotlin").setup()

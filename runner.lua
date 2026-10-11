@@ -24,13 +24,15 @@ end
 
 -- Notifications are collected (and a multi-line one can't wait for <Enter>).
 local messages = {}
-vim.notify = function(msg) table.insert(messages, msg) end
+vim.notify = function(msg)
+  table.insert(messages, msg)
+end
 vim.o.more = false
 
 local function read(path)
   local file = io.open(path, "r")
   if not file then return nil end
-  local content = file:read("*a")
+  local content = file:read "*a"
   file:close()
   return content
 end
@@ -47,8 +49,8 @@ end
 local function find(buf, line, word)
   word = word or line
   local pattern = vim.pesc(word)
-  if word:match("^[%w_]") then pattern = "%f[%w_]" .. pattern end
-  if word:match("[%w_]$") then pattern = pattern .. "%f[^%w_]" end
+  if word:match "^[%w_]" then pattern = "%f[%w_]" .. pattern end
+  if word:match "[%w_]$" then pattern = pattern .. "%f[^%w_]" end
   for row, text in ipairs(api.nvim_buf_get_lines(buf, 0, -1, false)) do
     local start = text:find(line, 1, true)
     if start then
@@ -77,9 +79,9 @@ end
 -- previous case. The definition also proves the cursor is on the right symbol.
 local function wait_for_lsp(buf, word, count)
   local attached = vim.wait(120000, function()
-    return #vim.lsp.get_clients({ bufnr = buf, name = "kotlin_lsp" }) > 0
+    return #vim.lsp.get_clients { bufnr = buf, name = "kotlin_lsp" } > 0
   end, 200)
-  if not attached then error("kotlin-lsp didn't attach") end
+  if not attached then error "kotlin-lsp didn't attach" end
 
   local params = vim.lsp.util.make_position_params(0, "utf-16")
   local definition, found = nil, 0
@@ -97,23 +99,25 @@ local function wait_for_lsp(buf, word, count)
     if definition == word and found >= count then return end
     vim.wait(1000)
   end
-  error(("kotlin-lsp: definition %q (expected %q), %d references (expected %d)"):format(
-    tostring(definition),
-    word,
-    found,
-    count
-  ))
+  error(
+    ("kotlin-lsp: definition %q (expected %q), %d references (expected %d)"):format(
+      tostring(definition),
+      word,
+      found,
+      count
+    )
+  )
 end
 
 local function run(case)
   local buf = api.nvim_get_current_buf()
-  local refactoring = require("refactoring")
+  local refactoring = require "refactoring"
   local keys
 
-  if case.kind:match("^extract_") then
+  if case.kind:match "^extract_" then
     -- A list for refactors that ask several things (extract_func_to_file).
     local input = type(case.input) == "table" and vim.deepcopy(case.input) or { case.input }
-    keys = refactoring[case.kind]({ input = input })
+    keys = refactoring[case.kind] { input = input }
     if case.lines then
       local from = find(buf, case.lines.from)
       local to = find(buf, case.lines.to)
@@ -137,9 +141,13 @@ local function run(case)
   -- LSP refactors are async: wait for the plugin's notification (or for an
   -- error, which async code reports through `v:errmsg`), then for the
   -- notifications to settle.
-  local function crashed() return vim.v.errmsg ~= "" end
-  if not vim.wait(60000, function() return #messages > 0 or crashed() end, 50) then
-    error("no notification from the refactor")
+  local function crashed()
+    return vim.v.errmsg ~= ""
+  end
+  if not vim.wait(60000, function()
+    return #messages > 0 or crashed()
+  end, 50) then
+    error "no notification from the refactor"
   end
   local seen = -1
   vim.wait(5000, function()
@@ -214,9 +222,13 @@ for _, case in ipairs(cases) do
       end
     else
       local names = {}
-      for name in pairs(result) do names[name] = true end
+      for name in pairs(result) do
+        names[name] = true
+      end
       if vim.fn.isdirectory(case_expected) == 1 then
-        for name in vim.fs.dir(case_expected) do names[name] = true end
+        for name in vim.fs.dir(case_expected) do
+          names[name] = true
+        end
       end
       for name in vim.spairs(names) do
         local expected, actual = read(case_expected .. "/" .. name), result[name]
@@ -238,11 +250,13 @@ for _, case in ipairs(cases) do
   end
 end
 
-log(("\n%d/%d passed in %.1fs%s"):format(
-  passed,
-  ran,
-  (vim.uv.now() - started) / 1000,
-  update and " (expected results updated)" or ""
-))
+log(
+  ("\n%d/%d passed in %.1fs%s"):format(
+    passed,
+    ran,
+    (vim.uv.now() - started) / 1000,
+    update and " (expected results updated)" or ""
+  )
+)
 if #failed > 0 then log("Failed: " .. table.concat(failed, ", ")) end
 vim.cmd(#failed > 0 and "cquit 1" or "qall!")
