@@ -1,0 +1,2 @@
+The extracted function requires multiple return values; only the first one is returned
+Function extracted

@@ -1,0 +1,4 @@
+# Gradle wrapper scripts keep their platform's line endings; the jar is binary.
+/project/gradlew        text eol=lf
+*.bat                   text eol=crlf
+*.jar                   binary

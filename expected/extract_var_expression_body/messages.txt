@@ -1,0 +1,1 @@
+Error: vim.schedule callback: extract_var.lua:263: assertion failed!

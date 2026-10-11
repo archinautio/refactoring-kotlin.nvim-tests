@@ -1,0 +1,2 @@
+1 call(s) not inlined, so the function was kept: safe calls (`?.`) run conditionally
+Inlined 4 function occurrences

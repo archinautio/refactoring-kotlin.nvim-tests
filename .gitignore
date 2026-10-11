@@ -1,0 +1,9 @@
+# Test results
+.out/
+# Pinned dependencies, the Kotlin parser and Neovim's state for the tests
+.deps/
+# Gradle / Kotlin / kotlin-lsp caches
+project/.gradle/
+project/.kotlin/
+project/build/
+project/.idea/

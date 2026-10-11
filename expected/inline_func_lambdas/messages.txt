@@ -1,0 +1,2 @@
+1 call(s) not inlined, so the function was kept: its body can't be moved before the statement (conditional code, an expression body or a one-line lambda)
+Inlined 2 function occurrences

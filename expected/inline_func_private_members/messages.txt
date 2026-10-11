@@ -1,0 +1,2 @@
+1 call(s) not inlined, so the function was kept: the body uses private members
+Inlined 2 function occurrences
