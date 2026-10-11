@@ -9,7 +9,12 @@ and the steps to add a case; this file is what you need to maintain it.
 After any change to the plugin (`../refactoring-kotlin.nvim/lua/`, `queries/`)
 or to this repo: run `./run.sh` and report the summary line. It must end in
 `ALL PASSED` (exit 0). While iterating, `./run.sh --no-compile <pattern>` is
-faster; finish with a full run. A bug in a refactor is fixed in the plugin repo,
+faster; finish with a full run.
+
+Before running it, format the Lua of both repos with `stylua .` in each:
+`run.sh` checks it first (refactoring.nvim's StyLua configuration, in
+`.stylua.toml`; `.styluaignore` keeps `.deps/` and `.out/` out) and fails the
+run if anything isn't formatted. A bug in a refactor is fixed in the plugin repo,
 not here.
 
 ## Expected results are reviewed, never trusted
@@ -47,7 +52,8 @@ from `expected/`, and each unsupported item is labelled *tested*, *verified* or
 - `run.sh` points `XDG_CONFIG_HOME`/`XDG_DATA_HOME`/`XDG_STATE_HOME`/`XDG_CACHE_HOME`
   into `.deps/xdg/` and starts Neovim with `-u minimal_init.lua`, so nothing
   from the user's Neovim config is loaded. That matters: a config with its own
-  `queries/kotlin/refactor_*.scm` would be merged with the plugin's (`;; extends`).
+  `queries/kotlin/refactor_*.scm` would replace the plugin's (it comes first on
+  'runtimepath'), or be merged with them if it starts with `;; extends`.
 - `minimal_init.lua` clones refactoring.nvim, async.nvim and nvim-treesitter
   into `.deps/` at **pinned commits** and builds the Kotlin parser there. The
   expected results depend on refactoring.nvim's code (and the recorded crash

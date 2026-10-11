@@ -16,6 +16,8 @@ plugin and kotlin-lsp), compares the changed files and the notifications with
 - A JDK for Gradle.
 - The plugin checked out next to this repo (`../refactoring-kotlin.nvim`), or
   its path in `PLUGIN_DIR`.
+- Optionally, [StyLua](https://github.com/JohnnyMorganz/StyLua): `run.sh` then
+  checks that the Lua of both repos is formatted (`stylua .` in each).
 
 The first run clones refactoring.nvim and its dependencies at pinned commits,
 builds the Kotlin parser into `.deps/`, and downloads Gradle and the Kotlin

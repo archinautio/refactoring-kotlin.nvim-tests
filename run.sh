@@ -33,6 +33,26 @@ done
 rm -rf "$out"
 mkdir -p "$out"
 
+# Formatting: StyLua with refactoring.nvim's configuration (`.stylua.toml` in
+# both repos), so code can be ported upstream as is. A failure fails the run,
+# but the tests still run.
+plugin_dir="${PLUGIN_DIR:-$dir/../refactoring-kotlin.nvim}"
+format_failed=0
+echo "== Formatting (StyLua)"
+if command -v stylua >/dev/null; then
+  for repo in "$plugin_dir" "$dir"; do
+    if (cd "$repo" && stylua --check . >/dev/null 2>&1); then
+      echo "ok   $repo"
+    else
+      echo "FAIL $repo (run \`stylua .\` there)"
+      format_failed=1
+    fi
+  done
+else
+  echo "SKIP stylua not found"
+fi
+echo
+
 # Neovim only sees minimal_init.lua: the user's config, plugins and parsers stay
 # out (XDG_* point into .deps/xdg, which also keeps the installed parser).
 export XDG_CONFIG_HOME="$dir/.deps/xdg/config" XDG_DATA_HOME="$dir/.deps/xdg/data"
@@ -115,6 +135,12 @@ if [[ $compile == 1 && -d "$out/results" ]]; then
     echo "Didn't compile: ${compile_failed[*]}"
     status=1
   fi
+fi
+
+if [[ $format_failed == 1 ]]; then
+  echo
+  echo "Not formatted with StyLua (see above)"
+  status=1
 fi
 
 echo
