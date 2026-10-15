@@ -10,6 +10,7 @@ this repo, so they are exactly what the refactor produces.
 | Extract variable | `extract_var()` (operator, or a visual selection) | no | [extract-variable.md](extract-variable.md) |
 | Inline variable | `inline_var()` on the variable (declaration or a usage) | yes | [inline-variable.md](inline-variable.md) |
 | Inline function | `inline_func()` on the function (definition or a call) | yes | [inline-function.md](inline-function.md) |
+| Debug prints | `refactoring.debug`'s `print_var()`, `print_exp()`, `print_loc()` and `cleanup()` | no | [debug-print.md](debug-print.md) |
 
 The pages say "the keymap" for whichever keymap you mapped to that function
 (see the [plugin's README](https://github.com/archinautio/refactoring-kotlin.nvim#installation)). kotlin-lsp itself only supports rename, so these

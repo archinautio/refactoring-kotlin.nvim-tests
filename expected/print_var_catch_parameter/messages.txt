@@ -1,0 +1,1 @@
+Couldn't find any reference inside of the extracted range with a declaration above output range using Treesitter

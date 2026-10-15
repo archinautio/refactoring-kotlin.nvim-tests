@@ -4,10 +4,14 @@
 --   name   unique name; the expected results live in `expected/<name>/`
 --   file   fixture in `project/src/main/kotlin/` where the refactor starts
 --   kind   extract_func | extract_func_to_file | extract_var | inline_var | inline_func
+--          | print_var | print_loc | print_exp | cleanup (debug prints)
 --   at     cursor: `{ line = <text in the line>, word = <text the cursor goes to> }`
 --          (the first line of `file` that contains `line`)
---   lines  linewise selection (extract): `{ from = <text>, to = <text> }`
---   select charwise selection (extract): `{ line = <text>, text = <selected text> }`
+--   lines  linewise selection (extract, cleanup): `{ from = <text>, to = <text> }`
+--   select charwise selection (extract, print_var, print_exp):
+--          `{ line = <text>, text = <selected text> }`
+--   opts   (debug prints) options passed to `refactoring.debug.<kind>()`,
+--          e.g. `{ output_location = "above" }`
 --   input  name asked by extract function/variable (a list for several
 --          questions; extract_func_to_file: `{ <function>, <file> }`)
 --   refs   (LSP refactors) wait until kotlin-lsp reports at least this many
@@ -227,6 +231,94 @@ return {
     kind = "inline_func",
     at = { line = "fun hidden", word = "hidden" },
     refs = 3,
+  },
+
+  -- Debug prints (Tree-sitter only). In a statement's header (a parameter, a
+  -- loop variable, a condition), the print goes into the body.
+  {
+    name = "print_var_statement",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "total += price", text = "total" },
+  },
+  {
+    name = "print_var_above",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "total += price", text = "price" },
+    opts = { output_location = "above" },
+  },
+  {
+    name = "print_var_parameter",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "fun orderTotal", text = "discount" },
+  },
+  {
+    name = "print_var_for_variable",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "for (price in prices)", text = "price" },
+  },
+  {
+    name = "print_var_while_condition",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "while (remaining > 0)", text = "remaining" },
+  },
+  {
+    name = "print_var_do_while_condition",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "} while (attempts < discount)", text = "attempts" },
+  },
+  {
+    name = "print_var_if_condition",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "if (total > discount)", text = "total" },
+  },
+  {
+    name = "print_var_lambda_parameter",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "names.forEach { name ->", text = "name" },
+  },
+  {
+    name = "print_var_local_function_parameter",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "fun label(city: String)", text = "city" },
+  },
+  {
+    name = "print_loc",
+    file = "DebugPrint.kt",
+    kind = "print_loc",
+    at = { line = "total += price", word = "total" },
+  },
+  {
+    name = "print_loc_in_lambda",
+    file = "DebugPrint.kt",
+    kind = "print_loc",
+    at = { line = "labels.add(name.uppercase())", word = "labels" },
+  },
+  {
+    name = "print_exp",
+    file = "DebugPrint.kt",
+    kind = "print_exp",
+    select = { line = "val summary", text = "amount + tip" },
+  },
+  {
+    name = "print_exp_string_escaped",
+    file = "DebugPrint.kt",
+    kind = "print_exp",
+    select = { line = "val summary", text = '"Total: $" + (amount + tip)' },
+  },
+  {
+    name = "debug_cleanup",
+    file = "DebugCleanup.kt",
+    kind = "cleanup",
+    lines = { from = "__PRINT_LOC_START", to = "__PRINT_EXP_END" },
   },
 
   -- Limitations: these cases record what happens today in the cases
@@ -451,5 +543,29 @@ return {
     kind = "inline_func",
     at = { line = "fun printTwoLines", word = "printTwoLines" },
     refs = 2,
+  },
+
+  -- Debug prints
+  {
+    name = "print_var_braceless_loop",
+    file = "DebugPrintLimits.kt",
+    kind = "print_var",
+    select = { line = "for (number in numbers)", text = "number" },
+    compiles = false,
+    reason = "the print goes after the loop, where the loop variable doesn't exist",
+  },
+  {
+    name = "print_var_lambda_result",
+    file = "DebugPrintLimits.kt",
+    kind = "print_var",
+    select = { line = "n * 2", text = "n" },
+    compiles = false,
+    reason = "the print becomes the lambda's result",
+  },
+  {
+    name = "print_var_catch_parameter",
+    file = "DebugPrintLimits.kt",
+    kind = "print_var",
+    select = { line = "catch (error", text = "error" },
   },
 }

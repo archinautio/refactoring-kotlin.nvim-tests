@@ -109,44 +109,58 @@ local function wait_for_lsp(buf, word, count)
   )
 end
 
+-- Debug prints (refactoring.nvim's `refactoring.debug`) and their cleanup.
+local DEBUG_KINDS = { print_var = true, print_loc = true, print_exp = true, cleanup = true }
+
 local function run(case)
   local buf = api.nvim_get_current_buf()
   local refactoring = require "refactoring"
-  local keys
+  local is_debug = DEBUG_KINDS[case.kind]
 
-  if case.kind:match "^extract_" then
-    -- A list for refactors that ask several things (extract_func_to_file).
-    local input = type(case.input) == "table" and vim.deepcopy(case.input) or { case.input }
-    keys = refactoring[case.kind] { input = input }
-    if case.lines then
-      local from = find(buf, case.lines.from)
-      local to = find(buf, case.lines.to)
-      api.nvim_win_set_cursor(0, { from, 0 })
-      keys = keys .. (to > from and (to - from) .. "j" or "_")
-    else
-      local row, col = find(buf, case.select.line, case.select.text)
-      api.nvim_win_set_cursor(0, { row, col })
-      keys = keys .. "v" .. (#case.select.text > 1 and (#case.select.text - 1) .. "l" or "")
-    end
+  -- The cursor, and the motion for the operator.
+  local motion = ""
+  if case.lines then
+    local from = find(buf, case.lines.from)
+    local to = find(buf, case.lines.to)
+    api.nvim_win_set_cursor(0, { from, 0 })
+    motion = to > from and (to - from) .. "j" or "_"
+  elseif case.select then
+    local row, col = find(buf, case.select.line, case.select.text)
+    api.nvim_win_set_cursor(0, { row, col })
+    -- `v` makes `l` inclusive; a single character is just `l` (exclusive).
+    motion = #case.select.text > 1 and "v" .. (#case.select.text - 1) .. "l" or "l"
   else
     local row, col = find(buf, case.at.line, case.at.word)
     api.nvim_win_set_cursor(0, { row, col })
     if case.refs then wait_for_lsp(buf, case.at.word, case.refs) end
+  end
+
+  local keys
+  if is_debug then
+    keys = require("refactoring.debug")[case.kind](case.opts)
+  elseif case.kind:match "^extract_" then
+    -- A list for refactors that ask several things (extract_func_to_file).
+    local input = type(case.input) == "table" and vim.deepcopy(case.input) or { case.input }
+    keys = refactoring[case.kind] { input = input }
+  else
     keys = refactoring[case.kind]()
   end
 
   messages = {}
   vim.v.errmsg = ""
-  vim.cmd("normal " .. api.nvim_replace_termcodes(keys, true, false, true))
+  vim.cmd("normal " .. api.nvim_replace_termcodes(keys .. motion, true, false, true))
   -- LSP refactors are async: wait for the plugin's notification (or for an
   -- error, which async code reports through `v:errmsg`), then for the
-  -- notifications to settle.
+  -- notifications to settle. Debug prints don't notify when they work, so for
+  -- them a changed buffer is enough.
   local function crashed()
     return vim.v.errmsg ~= ""
   end
-  if not vim.wait(60000, function()
-    return #messages > 0 or crashed()
-  end, 50) then
+  if
+    not vim.wait(60000, function()
+      return #messages > 0 or crashed() or (is_debug and vim.bo[buf].modified)
+    end, 50)
+  then
     error "no notification from the refactor"
   end
   local seen = -1
