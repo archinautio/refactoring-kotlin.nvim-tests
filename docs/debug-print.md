@@ -29,6 +29,9 @@ for (price in prices) {
 
 Above the statement: case `print_var_above`.
 
+A backticked variable works too: `` $`delivery note` `` is a valid template
+(case `print_var_backticked`).
+
 ### A variable in a statement's header → into its body
 
 A parameter, a `for` variable, a lambda parameter, or a `while` or `if`

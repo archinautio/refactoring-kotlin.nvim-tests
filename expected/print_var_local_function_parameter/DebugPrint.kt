@@ -42,3 +42,8 @@ fun receipt(amount: Int, tip: Int): String {
     val summary = "Total: $" + (amount + tip)
     return summary
 }
+
+fun deliveryNote(orderId: Int): String {
+    val `delivery note` = "Order $orderId"
+    return `delivery note`
+}

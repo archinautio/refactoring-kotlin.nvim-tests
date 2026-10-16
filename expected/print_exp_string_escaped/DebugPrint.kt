@@ -41,3 +41,8 @@ fun receipt(amount: Int, tip: Int): String {
     println("┆receipt┆ ╎\"Total: \$\" + (amount + tip)╎ ┊1┊: ${"Total: $" + (amount + tip)}")// __PRINT_EXP_END
     return summary
 }
+
+fun deliveryNote(orderId: Int): String {
+    val `delivery note` = "Order $orderId"
+    return `delivery note`
+}

@@ -316,6 +316,13 @@ return {
     select = { line = "fun label(city: String)", text = "city" },
   },
   {
+    -- `$`delivery note`` is a valid template: no `${…}` needed.
+    name = "print_var_backticked",
+    file = "DebugPrint.kt",
+    kind = "print_var",
+    select = { line = "val `delivery note`", text = "`delivery note`" },
+  },
+  {
     name = "print_var_labelled_loop_variable",
     file = "LabelledLoops.kt",
     kind = "print_var",
