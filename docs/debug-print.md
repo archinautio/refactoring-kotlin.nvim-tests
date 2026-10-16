@@ -35,8 +35,9 @@ A parameter, a `for` variable, a lambda parameter, or a `while` or `if`
 condition: the print goes at the start of the body, where the variable exists.
 Below its whole statement it could be out of scope. Cases
 `print_var_parameter`, `print_var_for_variable`, `print_var_lambda_parameter`,
-`print_var_local_function_parameter`, `print_var_while_condition` and
-`print_var_if_condition` (only the `if` branch, not the `else`). A `do`-`while`
+`print_var_local_function_parameter`, `print_var_while_condition`,
+`print_var_if_condition` (only the `if` branch, not the `else`) and
+`print_var_labelled_loop_variable` (a loop with a label). A `do`-`while`
 condition goes below the loop (case `print_var_do_while_condition`).
 
 The layout needs tidying: refactoring.nvim leaves a line with only the
@@ -105,6 +106,22 @@ removed, with their markers.
   as a declaration, so refactoring.nvim says "Couldn't find any reference
   inside of the extracted range with a declaration above output range" and
   nothing changes.
+- **Above a labelled loop** (tested: `print_var_labelled_loop_above`). With
+  `{ output_location = "above" }` and the cursor in the loop's header, the print
+  goes between the label and the loop. The label then belongs to the print, and
+  `break@search` doesn't compile ("Label does not denote a reachable loop"):
+
+  ```kotlin
+      var found = -1
+      search@ 
+  // __PRINT_VAR_START
+      println("┆firstOverLimit┆ ╎prices╎ ┊1┊: $prices")// __PRINT_VAR_END
+      for (price in prices.sorted()) {
+  ```
+
+  The label isn't part of the loop's Tree-sitter node, and refactoring.nvim
+  only knows where a statement's node starts. Below the loop (the default)
+  works: case `print_var_labelled_loop_variable`.
 - **An `else if` condition or a `when` subject** (untested). Only the first
   branch of an `if` is used as its body, and `when` has none, so the print goes
   around the whole statement.

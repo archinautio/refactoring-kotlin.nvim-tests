@@ -77,6 +77,14 @@ return {
     select = { line = "val tax = subtotal * taxRate", text = "subtotal * taxRate" },
     input = "taxed",
   },
+  {
+    -- The `val` goes above the label, not between it and the loop.
+    name = "extract_var_labelled_loop",
+    file = "LabelledLoops.kt",
+    kind = "extract_var",
+    select = { line = "search@ for", text = "prices.sorted()" },
+    input = "sortedPrices",
+  },
 
   -- Inline variable (kotlin-lsp + Tree-sitter)
   {
@@ -306,6 +314,12 @@ return {
     file = "DebugPrint.kt",
     kind = "print_var",
     select = { line = "fun label(city: String)", text = "city" },
+  },
+  {
+    name = "print_var_labelled_loop_variable",
+    file = "LabelledLoops.kt",
+    kind = "print_var",
+    select = { line = "search@ for", text = "price" },
   },
   {
     name = "print_loc",
@@ -584,5 +598,14 @@ return {
     file = "DebugPrintLimits.kt",
     kind = "print_var",
     select = { line = "catch (error", text = "error" },
+  },
+  {
+    name = "print_var_labelled_loop_above",
+    file = "LabelledLoops.kt",
+    kind = "print_var",
+    select = { line = "search@ for", text = "prices" },
+    opts = { output_location = "above" },
+    compiles = false,
+    reason = "the print goes between the label and the loop, so `break@search` no longer finds the loop",
   },
 }

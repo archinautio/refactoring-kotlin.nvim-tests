@@ -19,6 +19,14 @@ val taxed = subtotal * taxRate
 val tax = taxed
 ```
 
+A labelled loop keeps its label: the `val` goes above it. Case
+`extract_var_labelled_loop` (selection: `prices.sorted()`):
+
+```kotlin
+val sortedPrices = prices.sorted()
+search@ for (price in sortedPrices) {
+```
+
 ### An expression inside a one-line lambda
 
 Case `extract_var_in_lambda`: the `val` goes inside the lambda, so `it` is
