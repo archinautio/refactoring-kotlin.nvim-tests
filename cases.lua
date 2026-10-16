@@ -52,6 +52,23 @@ return {
     reason = placeholder_types,
   },
 
+  -- A function without leading comments after one with them: the new function
+  -- goes right above it, not above the commented one.
+  {
+    name = "extract_func_after_commented_function",
+    file = "CommentedFunctions.kt",
+    kind = "extract_func",
+    lines = { from = 'println("Goodbye")', to = 'println("See you")' },
+    input = "sayGoodbye",
+  },
+  {
+    name = "extract_func_after_commented_method",
+    file = "CommentedFunctions.kt",
+    kind = "extract_func",
+    lines = { from = 'println("Second")', to = 'println("Done")' },
+    input = "sendSecond",
+  },
+
   -- Extract variable (Tree-sitter only)
   {
     name = "extract_var",

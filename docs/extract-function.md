@@ -41,8 +41,10 @@ fun total(prices: List<Int>, taxRate: Double): Double {
 ### Statements in a top-level function → a top-level `private fun`
 
 The new function goes right above the function it came from (above its
-comments, if any). With no value used afterwards, the call is a plain
-statement. Case `extract_func_top_level`:
+comments, if any), also when an earlier function has comments and this one
+doesn't (cases `extract_func_after_commented_function` and, in a class,
+`extract_func_after_commented_method`). With no value used afterwards, the call
+is a plain statement. Case `extract_func_top_level`:
 
 ```kotlin
 private fun report(squared: P, doubled: P) {
@@ -70,7 +72,8 @@ isn't written in the source, so it's `P`.
 
 ## Not supported
 
-- **Inferred types** (tested: every `extract_func_*` case). A type is only known
+- **Inferred types** (tested: every `extract_func_*` case with parameters or
+  a return value). A type is only known
   when the source writes it (a parameter, `val x: Int = …`); otherwise the
   parameter or return type is the placeholder `P`, which doesn't compile until
   you replace it. kotlin-lsp knows the types, but the plugin doesn't ask it.
