@@ -1,0 +1,41 @@
+# Temporary: measures kotlin-lsp's startup time on GitHub Actions.
+name: kotlin-lsp startup
+on:
+  push:
+    branches: [tmp/kotlin-lsp-startup]
+  workflow_dispatch:
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Install Neovim and kotlin-lsp
+        run: |
+          mkdir -p ~/tools && cd ~/tools
+          curl -sSfL https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-x86_64.tar.gz | tar xz
+          curl -sSfL https://download.jetbrains.com/language-server/kotlin-server/263.6379.0/kotlin-server-263.6379.0.tar.gz -o kls.tar.gz
+          echo "ab8ca4455dc2fc5fe1a24db2bccc46c104254d2c465155c4251ee65df8f3f7cc  kls.tar.gz" | sha256sum -c
+          tar xzf kls.tar.gz
+          mkdir -p ~/bin && ln -s ~/tools/kotlin-server-263.6379.0/kotlin-lsp.sh ~/bin/kotlin-lsp
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+          echo "$HOME/tools/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Machine
+        run: nproc; free -h; nvim --version | head -1; java -version
+      - name: "Run 1: cold (no Gradle distribution, no kotlin-lsp caches)"
+        run: nvim --clean --headless -l .github/lsp_startup.lua project
+      - name: Caches written by run 1
+        run: |
+          du -sh ~/.gradle ~/.cache/* ~/.local/share/* ~/.config/* 2>/dev/null || true
+          find project -maxdepth 1 -newer .github/lsp_startup.lua
+      - name: "Run 2: warm"
+        run: nvim --clean --headless -l .github/lsp_startup.lua project
+      - name: "Run 3: warm"
+        run: nvim --clean --headless -l .github/lsp_startup.lua project
+      - name: "Run 4: Gradle warm, kotlin-lsp caches removed"
+        run: |
+          rm -rf ~/.cache/JetBrains ~/.local/share/JetBrains ~/.config/JetBrains project/.idea project/.kotlin
+          nvim --clean --headless -l .github/lsp_startup.lua project
